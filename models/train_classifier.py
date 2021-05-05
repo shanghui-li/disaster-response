@@ -15,6 +15,15 @@ import pickle
 
 
 def load_data(database_filepath):
+    """
+    Returns the messages, message labels and category names to be used for model training
+    Input
+        database_filepath: path to the SQLlte database where the cleaned data is stored
+    Output
+        X: Series containing the disaster messages
+        Y: DataFrame containig the message labels
+        category_names: category names that messages could be classified under
+    """    
     prefix = 'sqlite:///'
     engine = create_engine(prefix + database_filepath)
     df = pd.read_sql_table('disaster_messages', con=engine)
@@ -25,6 +34,13 @@ def load_data(database_filepath):
 
 
 def tokenize(text):
+    """
+    Custom tokenization function that returns cleaned text tokens from a message
+    Input
+        text: string containing the message
+    Output
+        clean_tokens: list containing the text tokens parsed from the message
+    """
     tokens = word_tokenize(text)
     lemmatizer = WordNetLemmatizer()
     
@@ -36,6 +52,11 @@ def tokenize(text):
 
 
 def build_model():
+    """
+    Builds a machine learning pipeline that fits models classifying messages into multiple categories. Returns a GridSearchCV object with the fitted models
+    Output
+        cv: GridSearchCV object that contains models for classifying messages into multiple categories
+    """
     pipeline = Pipeline([
         ('tokenize', CountVectorizer(tokenizer=tokenize)),
         ('tfidf', TfidfTransformer()),
@@ -52,6 +73,14 @@ def build_model():
 
 
 def evaluate_model(model, X_test, Y_test, category_names):
+    """
+    Prints the classification report for each category, based on output from the fitted model
+    Inputs
+        model: GridSearchCV or Pipeline object that can generate predictions based on test data
+        X_test: validation set containing independent variables
+        Y_test: validation set containing dependent variables
+        category_names: category names that messages can be classified under
+    """
     Y_pred = model.predict(X_test)
     for i, col in enumerate(category_names):
         print(col)
@@ -59,10 +88,19 @@ def evaluate_model(model, X_test, Y_test, category_names):
 
 
 def save_model(model, model_filepath):
+    """
+    Saves the best fitted model to the destination location
+    Input
+        model: GridSearchCV object containing fitted models
+        model_filepath: filepath to where model is to be saved
+    """
     pickle.dump(model.best_estimator_, open(model_filepath, 'wb'))
 
 
 def main():
+    """
+    Loads clean data, trains model and saves best model to be used in app for prediction
+    """
     if len(sys.argv) == 3:
         database_filepath, model_filepath = sys.argv[1:]
         print('Loading data...\n    DATABASE: {}'.format(database_filepath))

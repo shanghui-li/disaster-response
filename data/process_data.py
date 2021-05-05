@@ -4,12 +4,27 @@ from sqlalchemy import create_engine
 
 
 def load_data(messages_filepath, categories_filepath):
+    """
+    Returns a data frame containing the messages and their corresponding labelled categories in raw form
+    Inputs
+        messages_filepath: path to csv file containing the messages
+        categories_filepath: path to csv file containing the category labels for each message
+    Output
+        df: data frame that merges both raw data sources on the message id
+    """
     messages = pd.read_csv(messages_filepath)
     categories = pd.read_csv(categories_filepath)
     df = pd.merge(messages, categories, how='inner', on='id')
     return df
 
 def clean_data(df):
+    """
+    Returns a cleaned data frame showing which categories each message was labelled under
+    Input
+        df: data frame containing raw message and category data
+    Output
+        df: cleaned data frame with a column for each potential category and with duplicates removed
+    """
     # create a dataframe of the 36 individual category columns
     categories = df['categories'].str.split(pat=';', expand=True)
     # select the first row of the categories dataframe. use this row to extract a list of new column names for categories.
@@ -33,11 +48,20 @@ def clean_data(df):
 
 
 def save_data(df, database_filename):
+    """
+    Saves the cleaned data in an SQLite database
+    Input
+        df: cleaned data frame with messages and corresponding categories
+        database_filename: filepath where database is to be saved, e.g. disaster_response.db
+    """
     prefix = 'sqlite:///'
     engine = create_engine(prefix + database_filename)
     df.to_sql('disaster_messages', engine, index=False) 
 
 def main():
+    """
+    Runs above functions to read in raw data, clean the data and save the data to an SQLite database
+    """
     if len(sys.argv) == 4:
 
         messages_filepath, categories_filepath, database_filepath = sys.argv[1:]
