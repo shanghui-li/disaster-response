@@ -3,6 +3,7 @@ import pandas as pd
 import numpy as np
 from sqlalchemy import create_engine
 import nltk
+# nltk.download('stopwords')
 from nltk.tokenize import word_tokenize
 from nltk.stem import WordNetLemmatizer
 from sklearn.pipeline import Pipeline, FeatureUnion
@@ -42,6 +43,7 @@ def tokenize(text):
         clean_tokens: list containing the text tokens parsed from the message
     """
     tokens = word_tokenize(text)
+#     words = [w for w in words if w not in stopwords.words("english")]
     lemmatizer = WordNetLemmatizer()
     
     clean_tokens = []
@@ -68,7 +70,7 @@ def build_model():
         'moc__estimator__n_estimators': (50, 100)
     }
 
-    cv = GridSearchCV(pipeline, param_grid=parameters)
+    cv = GridSearchCV(pipeline, param_grid=parameters, verbose=3)
     return cv
 
 
