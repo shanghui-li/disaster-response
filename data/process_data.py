@@ -38,6 +38,8 @@ def clean_data(df):
 
         # convert column from string to numeric
         categories[column] = categories[column].str[-1].astype(int)
+    # replace 2's in column 'related' with 1's
+    categories.loc[categories.related==2, 'related']=1 
     # drop the original categories column from `df`
     df = df.drop(columns=['categories'], axis=1)
     # concatenate the original dataframe with the new `categories` dataframe
@@ -56,7 +58,7 @@ def save_data(df, database_filename):
     """
     prefix = 'sqlite:///'
     engine = create_engine(prefix + database_filename)
-    df.to_sql('disaster_messages', engine, index=False) 
+    df.to_sql('disaster_messages', engine, if_exists='replace', index=False) 
 
 def main():
     """
